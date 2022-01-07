@@ -56,7 +56,7 @@ func (d Disclosure) LoadDocString(year string) []byte {
 	body, err := io.ReadAll(resp.Body)
 	must(err)
 	if resp.StatusCode != 200 {
-		log.Printf("Error response %s %d:\n %s", url, resp.StatusCode, string(body))
+		log.Printf("Response != 200 for %s: %d", url, resp.StatusCode)
 		return []byte{}
 	}
 
