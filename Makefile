@@ -1,6 +1,12 @@
 run:
 	go run *.go
 
+export PATH := $(PATH):/usr/local/go/bin
+
+install-go:
+	curl https://go.dev/dl/go1.17.6.linux-amd64.tar.gz > /tmp/go.tar.gz
+	rm -rf /usr/local/go && tar -C /usr/local -xzf /tmp/go.tar.gz
+
 deps:
 	sudo apt install -y libreoffice tesseract-ocr
 
