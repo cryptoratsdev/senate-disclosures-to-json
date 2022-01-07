@@ -4,9 +4,9 @@ run:
 export PATH := $(PATH):/usr/local/go/bin
 
 install-go:
-	curl -L https://go.dev/dl/go1.17.6.linux-amd64.tar.gz > /tmp/go.tar.gz
-	sudo rm -rf /usr/local/go
-	sudo tar -C /usr/local -xzf /tmp/go.tar.gz
+	sudo add-apt-repository ppa:longsleep/golang-backports -y
+	sudo apt update
+	sudo apt install -y golang-go
 
 deps:
 	sudo apt install -y libreoffice tesseract-ocr
