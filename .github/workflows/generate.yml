@@ -1,0 +1,24 @@
+name: generate
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@master
+      with:
+        ref: source
+    - name: checkout output
+      run: make output
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    - name: checkout output
+      run: make run setup-git commit
+      env:
+        GIT_NAME: Max Gonzih via GH Actions
+        GIT_EMAIL: gonzih@gmail.com
