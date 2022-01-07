@@ -20,6 +20,7 @@ func main() {
 	}
 
 	for _, year := range years {
+		// year, _, _ := time.Now().Date()
 		ry := NewYear(year)
 		data := ry.Data()
 		for _, disc := range data.Disclosures {
