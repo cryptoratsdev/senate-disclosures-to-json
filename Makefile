@@ -30,3 +30,7 @@ commit: output
 	&& (git commit -a -m "Data updated at $(shell date)"  || echo "Nothing to commit") \
 	&& git push \
 	&& cd ..
+
+build-and-run:
+	go build -o main .
+	./main
