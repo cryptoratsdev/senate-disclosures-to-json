@@ -1,5 +1,7 @@
 package main
 
+import "sync"
+
 func main() {
 	years := []string{
 		// "2008",
@@ -15,16 +17,24 @@ func main() {
 		// "2018",
 		// "2019",
 		// "2020",
-		// "2021",
+		"2021",
 		"2022",
 	}
 
+	var wg sync.WaitGroup
+
 	for _, year := range years {
 		// year, _, _ := time.Now().Date()
-		ry := NewYear(year)
-		data := ry.Data()
-		for _, disc := range data.Disclosures {
-			disc.DocString(ry.Year)
-		}
+		wg.Add(1)
+		go func(year string) {
+			defer wg.Done()
+			ry := NewYear(year)
+			data := ry.Data()
+			for _, disc := range data.Disclosures {
+				disc.DocString(ry.Year)
+			}
+		}(year)
 	}
+
+	wg.Wait()
 }

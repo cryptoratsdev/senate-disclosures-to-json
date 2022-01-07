@@ -15,16 +15,23 @@ func PdfToPng(fname string) string {
 	dir := filepath.Dir(fname)
 	cmd := exec.Command("loffice", "--headless", "--invisible", "--convert-to", "png", "--outdir", dir, fname)
 	log.Printf("Converting %s to png %v", fname, cmd.Args)
-	var out bytes.Buffer
-	cmd.Stderr = &out
+	var outB bytes.Buffer
+	var errB bytes.Buffer
+	cmd.Stdout = &outB
+	cmd.Stderr = &errB
 	err := cmd.Run()
-	must(err)
-	output := string(out.Bytes())
 
+	output := string(outB.Bytes())
+	errout := string(errB.Bytes())
 	if strings.Contains(output, "Error") {
-		err = fmt.Errorf("Error converting to png: %s", output)
+		err = fmt.Errorf("Error converting to png: %s\n%s", output, errout)
 		must(err)
 	}
+	if err != nil {
+		log.Printf("Error running: %v: \n%s\n%s", cmd.Args, output, errout)
+	}
+
+	must(err)
 
 	return strings.ReplaceAll(fname, ".pdf", ".png")
 
