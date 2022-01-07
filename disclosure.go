@@ -85,5 +85,5 @@ func (d Disclosure) DocString(year string) []byte {
 	log.Printf("Saving data for %s from cache %s", d.DocID, fname)
 	err := ioutil.WriteFile(fname, bytes, 0644)
 	must(err)
-	return []byte(d.DocUrl(year))
+	return bytes
 }
