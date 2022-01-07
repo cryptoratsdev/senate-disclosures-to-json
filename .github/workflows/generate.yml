@@ -13,7 +13,7 @@ jobs:
     - run: make output
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-    - run: make install-go deps run setup-git commit
+    - run: make install-go deps build-and-run setup-git commit
       env:
         GIT_NAME: Max Gonzih via GH Actions
         GIT_EMAIL: gonzih@gmail.com
