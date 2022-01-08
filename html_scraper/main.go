@@ -3,6 +3,7 @@ package html_scraper
 import (
 	"encoding/json"
 	"fmt"
+	"path"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -44,9 +45,10 @@ func GetReports(c *colly.Collector, csrftoken string, offset int, draw int) {
 func Run() {
 	c := colly.NewCollector()
 	offset := 0
-	count := 0
 	draw := 1
 	var csrftoken string
+	lookup := map[string]ResponseData{}
+	reports := []Report{}
 
 	c.OnHTML("form#agreement_form", func(e *colly.HTMLElement) {
 		e.ForEach("input", func(n int, el *colly.HTMLElement) {
@@ -73,8 +75,24 @@ func Run() {
 		GetReports(c, csrftoken, offset, draw)
 	})
 
-	c.OnHTML("tbody", func(e *colly.HTMLElement) {
-		log.Printf("Table: %v", e)
+	c.OnHTML("tbody tr", func(e *colly.HTMLElement) {
+		tds := []string{}
+
+		e.ForEach("td", func(i int, el *colly.HTMLElement) {
+			tds = append(tds, el.Text)
+		})
+
+		id := path.Base(e.Request.URL.String())
+		reportData, ok := lookup[e.Request.URL.String()]
+		if ok {
+			report := NewReport(id, reportData, tds)
+			ticker := report.Ticker
+			if report.AssetType == "Stock" && ticker != "--" && len(ticker) > 0 {
+				reports = append(reports, report)
+				log.Println(report)
+				report.Save()
+			}
+		}
 	})
 
 	c.OnResponse(func(r *colly.Response) {
@@ -86,15 +104,16 @@ func Run() {
 			log.Printf("Got %d reports, draw %d\n", len(resp.Reports()), resp.Draw)
 
 			if len(resp.Reports()) > 0 {
-				count += len(resp.Reports())
 				offset += BATCH_SIZE
 				draw = resp.Draw + 1
 				log.Println("Reports not empty, going again")
 				GetReports(c, csrftoken, offset, draw)
 			}
 
-			for _, report := range resp.Reports() {
-				c.Visit(fmt.Sprintf("%s%s", ROOT, report.URL()))
+			for _, rd := range resp.Reports() {
+				url := fmt.Sprintf("%s%s", ROOT, rd.URL())
+				lookup[url] = rd
+				c.Visit(url)
 			}
 		}
 	})
@@ -113,5 +132,6 @@ func Run() {
 	c.Visit(LANDING)
 	c.Wait()
 
-	log.Printf("Collected %d reports", count)
+	log.Println(reports[0])
+	log.Printf("Collected %d reports", len(reports))
 }
