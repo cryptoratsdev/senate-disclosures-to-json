@@ -19,15 +19,36 @@ var (
 	BATCH_SIZE = 100
 )
 
+func GetReports(c *colly.Collector, csrftoken string, offset int, draw int) {
+	data := map[string]string{
+		"draw":                 fmt.Sprintf("%d", draw),
+		"start":                fmt.Sprintf("%d", offset),
+		"length":               fmt.Sprintf("%d", BATCH_SIZE),
+		"report_types":         "[11]",
+		"filer_types":          "[]",
+		"submitted_start_date": "01/01/2012 00:00:00",
+		"submitted_end_date":   "",
+		"candidate_state":      "",
+		"senator_state":        "",
+		"office_id":            "",
+		"first_name":           "",
+		"last_name":            "",
+	}
+
+	data[CSRF_NAME] = csrftoken
+
+	log.Println("Loading reports with offset", offset)
+	c.Post(REPORTS, data)
+}
+
 func Run() {
 	c := colly.NewCollector()
 	offset := 0
 	count := 0
 	draw := 1
+	var csrftoken string
 
 	c.OnHTML("form#agreement_form", func(e *colly.HTMLElement) {
-		var csrftoken string
-
 		e.ForEach("input", func(n int, el *colly.HTMLElement) {
 			if el.Attr("name") == CSRF_NAME {
 				csrftoken = el.Attr("value")
@@ -38,13 +59,10 @@ func Run() {
 			CSRF_NAME:               csrftoken,
 			"prohibition_agreement": "1",
 		})
-
 	})
 
 	c.OnHTML("form#searchForm", func(e *colly.HTMLElement) {
 		log.Println("Search Form")
-
-		var csrftoken string
 
 		e.ForEach("input", func(n int, el *colly.HTMLElement) {
 			if el.Attr("name") == CSRF_NAME {
@@ -52,25 +70,11 @@ func Run() {
 			}
 		})
 
-		data := map[string]string{
-			"draw":                 fmt.Sprintf("%d", draw),
-			"start":                fmt.Sprintf("%d", offset),
-			"length":               fmt.Sprintf("%d", BATCH_SIZE),
-			"report_types":         "[11]",
-			"filer_types":          "[]",
-			"submitted_start_date": "01/01/2012 00:00:00",
-			"submitted_end_date":   "",
-			"candidate_state":      "",
-			"senator_state":        "",
-			"office_id":            "",
-			"first_name":           "",
-			"last_name":            "",
-		}
+		GetReports(c, csrftoken, offset, draw)
+	})
 
-		data[CSRF_NAME] = csrftoken
-
-		log.Println("Loading reports with offset", offset)
-		e.Request.Post(REPORTS, data)
+	c.OnHTML("tbody", func(e *colly.HTMLElement) {
+		log.Printf("Table: %v", e)
 	})
 
 	c.OnResponse(func(r *colly.Response) {
@@ -86,7 +90,11 @@ func Run() {
 				offset += BATCH_SIZE
 				draw = resp.Draw + 1
 				log.Println("Reports not empty, going again")
-				r.Request.Visit(SEARCH)
+				GetReports(c, csrftoken, offset, draw)
+			}
+
+			for _, report := range resp.Reports() {
+				c.Visit(fmt.Sprintf("%s%s", ROOT, report.URL()))
 			}
 		}
 	})
