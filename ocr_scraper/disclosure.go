@@ -1,4 +1,4 @@
-package main
+package ocr_scraper
 
 import (
 	"encoding/xml"
