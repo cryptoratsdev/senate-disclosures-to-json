@@ -101,25 +101,25 @@ func trim(s string) string {
 }
 
 type ReportIndex struct {
-	Index []string `json:"index"`
+	All []Report `json:"all"`
 }
 
 func NewReportIndex(reports []Report) *ReportIndex {
-	ri := &ReportIndex{[]string{}}
+	ri := &ReportIndex{[]Report{}}
 	for _, report := range reports {
-		ri.AddID(report.ID)
+		ri.AddReport(report)
 	}
 
 	return ri
 }
 
-func (ri *ReportIndex) AddID(id string) {
-	ri.Index = append(ri.Index, id)
+func (ri *ReportIndex) AddReport(report Report) {
+	ri.All = append(ri.All, report)
 }
 
 func (ri *ReportIndex) Save() {
 	data, err := json.Marshal(ri)
 	must(err)
-	fname := "output/reports/index.json"
+	fname := "output/reports/all.json"
 	must(ioutil.WriteFile(fname, data, 0644))
 }
