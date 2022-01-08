@@ -2,16 +2,24 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/sync/semaphore"
 )
+
+var ctx = context.TODO()
+var libreofficeSem = semaphore.NewWeighted(1)
 
 // loffice --headless --invisible --convert-to png --outdir . 20019600.pdf
 func PdfToPng(fname string) string {
+	libreofficeSem.Acquire(ctx, 1)
+	defer libreofficeSem.Release(1)
 	dir := filepath.Dir(fname)
 	cmd := exec.Command("loffice", "--headless", "--invisible", "--convert-to", "png", "--outdir", dir, fname)
 	log.Printf("Converting %s to png %v", fname, cmd.Args)
