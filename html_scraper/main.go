@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -43,7 +44,13 @@ func GetReports(c *colly.Collector, csrftoken string, offset int, draw int) {
 }
 
 func Run() {
-	c := colly.NewCollector()
+	c := colly.NewCollector(colly.Async(true))
+	c.Limit(&colly.LimitRule{
+		DomainGlob:  "*",
+		Parallelism: 2,
+		Delay:       2 * time.Second,
+	})
+
 	offset := 0
 	draw := 1
 	var csrftoken string
