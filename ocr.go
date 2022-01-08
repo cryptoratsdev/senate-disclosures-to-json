@@ -16,7 +16,6 @@ import (
 var ctx = context.TODO()
 var libreofficeSem = semaphore.NewWeighted(1)
 
-// loffice --headless --invisible --convert-to png --outdir . 20019600.pdf
 func PdfToPng(fname string) string {
 	libreofficeSem.Acquire(ctx, 1)
 	defer libreofficeSem.Release(1)
