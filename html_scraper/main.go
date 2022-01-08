@@ -116,7 +116,7 @@ func Run() {
 				offset += BATCH_SIZE
 				draw = resp.Draw + 1
 				log.Println("Reports not empty, going again")
-				// GetReports(c, csrftoken, offset, draw)
+				GetReports(c, csrftoken, offset, draw)
 			}
 
 			for _, rd := range resp.Reports() {
