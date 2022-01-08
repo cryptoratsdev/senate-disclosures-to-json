@@ -97,7 +97,6 @@ func Run() {
 			})
 
 			if len(report.Transactions) > 0 {
-				log.Println(report)
 				reports = append(reports, report)
 				report.Save()
 			}
