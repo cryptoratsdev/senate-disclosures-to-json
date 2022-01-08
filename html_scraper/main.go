@@ -43,7 +43,7 @@ func GetReports(c *colly.Collector, csrftoken string, offset int, draw int) {
 }
 
 func Run() {
-	c := colly.NewCollector(colly.Async(true))
+	c := colly.NewCollector()
 	offset := 0
 	draw := 1
 	var csrftoken string
