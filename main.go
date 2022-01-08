@@ -28,8 +28,9 @@ func main() {
 		// "2022",
 	}
 
-	year, _, _ := time.Now().Date()
-	years = append(years, fmt.Sprintf("%d", year))
+	cy, _, _ := time.Now().Date()
+	currentYear := fmt.Sprintf("%d", cy)
+	years = append(years, currentYear)
 
 	var wg sync.WaitGroup
 	ctx := context.TODO()
@@ -37,6 +38,9 @@ func main() {
 
 	for _, year := range years {
 		ry := NewYear(year)
+		if year == currentYear {
+			ry.ResetCache()
+		}
 		data := ry.Data()
 		for _, disc := range data.Disclosures {
 			wg.Add(1)

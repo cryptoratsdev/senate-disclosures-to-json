@@ -87,3 +87,7 @@ func (ry ReportYear) Data() Disclosures {
 
 	return disc
 }
+
+func (ry ReportYear) ResetCache() {
+	must(os.Remove(ry.CacheFname()))
+}
