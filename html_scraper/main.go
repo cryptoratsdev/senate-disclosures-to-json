@@ -141,6 +141,7 @@ func Run() {
 	c.Visit(LANDING)
 	c.Wait()
 
-	log.Println(reports[0])
+	NewReportIndex(reports).Save()
+
 	log.Printf("Collected %d reports", len(reports))
 }
