@@ -46,27 +46,17 @@ func (r *ResponseData) URL() string {
 	return r.Href
 }
 
-type Report struct {
-	ID         string `json:"id"`
-	FirstName  string `json:"first_name"`
-	LastName   string `json:"last_name"`
-	Office     string `json:"office"`
-	ReportDate string `json:"report_date"`
-	Date       string `json:"date"`
-	Ticker     string `json:"ticker"`
-	AssetName  string `json:"asset_name"`
-	AssetType  string `json:"asset_type"`
-	OrderType  string `json:"order_type"`
-	Amount     string `json:"amount"`
+type Transaction struct {
+	Date      string `json:"date"`
+	Ticker    string `json:"ticker"`
+	AssetName string `json:"asset_name"`
+	AssetType string `json:"asset_type"`
+	OrderType string `json:"order_type"`
+	Amount    string `json:"amount"`
 }
 
-func NewReport(id string, responseData ResponseData, input []string) Report {
-	return Report{
-		id,
-		responseData.Fname,
-		responseData.Lname,
-		responseData.Office,
-		responseData.Dates,
+func NewTransaction(input []string) Transaction {
+	return Transaction{
 		trim(input[1]),
 		trim(input[3]),
 		trim(input[4]),
@@ -74,6 +64,29 @@ func NewReport(id string, responseData ResponseData, input []string) Report {
 		trim(input[6]),
 		trim(input[7]),
 	}
+}
+
+type Report struct {
+	ID           string        `json:"id"`
+	FirstName    string        `json:"first_name"`
+	LastName     string        `json:"last_name"`
+	Office       string        `json:"office"`
+	ReportDate   string        `json:"report_date"`
+	Transactions []Transaction `json:"transactions"`
+}
+
+func NewReport(id string, responseData ResponseData) Report {
+	return Report{
+		id,
+		responseData.Fname,
+		responseData.Lname,
+		responseData.Office,
+		responseData.Dates,
+		[]Transaction{},
+	}
+}
+func (r *Report) AddTransaction(tx Transaction) {
+	r.Transactions = append(r.Transactions, tx)
 }
 
 func (r *Report) Save() {

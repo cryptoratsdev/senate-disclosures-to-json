@@ -75,21 +75,30 @@ func Run() {
 		GetReports(c, csrftoken, offset, draw)
 	})
 
-	c.OnHTML("tbody tr", func(e *colly.HTMLElement) {
-		tds := []string{}
-
-		e.ForEach("td", func(i int, el *colly.HTMLElement) {
-			tds = append(tds, el.Text)
-		})
-
+	c.OnHTML("tbody", func(e *colly.HTMLElement) {
 		id := path.Base(e.Request.URL.String())
 		reportData, ok := lookup[e.Request.URL.String()]
+
 		if ok {
-			report := NewReport(id, reportData, tds)
-			ticker := report.Ticker
-			if report.AssetType == "Stock" && ticker != "--" && len(ticker) > 0 {
-				reports = append(reports, report)
+			report := NewReport(id, reportData)
+
+			e.ForEach("tr", func(i int, tre *colly.HTMLElement) {
+				tds := []string{}
+
+				e.ForEach("td", func(i int, tde *colly.HTMLElement) {
+					tds = append(tds, tde.Text)
+				})
+
+				tx := NewTransaction(tds)
+				ticker := tx.Ticker
+				if tx.AssetType == "Stock" && ticker != "--" && len(ticker) > 0 {
+					report.AddTransaction(tx)
+				}
+			})
+
+			if len(report.Transactions) > 0 {
 				log.Println(report)
+				reports = append(reports, report)
 				report.Save()
 			}
 		}
@@ -107,7 +116,7 @@ func Run() {
 				offset += BATCH_SIZE
 				draw = resp.Draw + 1
 				log.Println("Reports not empty, going again")
-				GetReports(c, csrftoken, offset, draw)
+				// GetReports(c, csrftoken, offset, draw)
 			}
 
 			for _, rd := range resp.Reports() {
