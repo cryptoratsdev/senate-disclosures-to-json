@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path"
 	"strings"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -47,15 +46,15 @@ func Run() {
 	c := colly.NewCollector(colly.Async(true))
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
-		Parallelism: 2,
-		Delay:       2 * time.Second,
+		Parallelism: 1,
+		// Delay:       2 * time.Second,
 	})
 
+	reportsCounter := 0
 	offset := 0
 	draw := 1
 	var csrftoken string
 	lookup := map[string]ResponseData{}
-	reports := []Report{}
 
 	c.OnHTML("form#agreement_form", func(e *colly.HTMLElement) {
 		e.ForEach("input", func(n int, el *colly.HTMLElement) {
@@ -103,10 +102,7 @@ func Run() {
 				}
 			})
 
-			if len(report.Transactions) > 0 {
-				reports = append(reports, report)
-				report.Save()
-			}
+			report.Save()
 		}
 	})
 
@@ -128,7 +124,11 @@ func Run() {
 			for _, rd := range resp.Reports() {
 				url := fmt.Sprintf("%s%s", ROOT, rd.URL())
 				lookup[url] = rd
-				c.Visit(url)
+				if !rd.Exists() {
+					log.Printf("Found new report %s, scraping", rd.ID())
+					reportsCounter++
+					c.Visit(url)
+				}
 			}
 		}
 	})
@@ -147,7 +147,6 @@ func Run() {
 	c.Visit(LANDING)
 	c.Wait()
 
-	NewReportIndex(reports).Save()
-
-	log.Printf("Collected %d reports", len(reports))
+	NewReportIndex("output/reports").Save()
+	log.Printf("Found %d new reports", reportsCounter)
 }
