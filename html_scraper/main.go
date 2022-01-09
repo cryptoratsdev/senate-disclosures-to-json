@@ -46,7 +46,7 @@ func Run() {
 	c := colly.NewCollector(colly.Async(true))
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
-		Parallelism: 1,
+		Parallelism: 2,
 		// Delay:       2 * time.Second,
 	})
 
