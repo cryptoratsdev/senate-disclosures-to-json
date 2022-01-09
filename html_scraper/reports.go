@@ -137,6 +137,7 @@ func NewReportIndex(dir string) *ReportIndex {
 
 		if strings.HasSuffix(path, ".json") && !strings.HasSuffix(path, "all.json") {
 			report := ReportFromFile(path)
+			// Only add reports that have any transactions
 			if len(report.Transactions) > 0 {
 				ri.AddReport(report)
 			}
