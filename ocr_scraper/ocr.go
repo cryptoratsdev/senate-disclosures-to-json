@@ -28,8 +28,8 @@ func PdfToPng(fname string) string {
 	cmd.Stderr = &errB
 	err := cmd.Run()
 
-	output := string(outB.Bytes())
-	errout := string(errB.Bytes())
+	output := outB.String()
+	errout := errB.String()
 	if strings.Contains(output, "Error") {
 		err = fmt.Errorf("Error converting to png: %s\n%s", output, errout)
 		must(err)
