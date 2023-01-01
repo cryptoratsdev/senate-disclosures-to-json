@@ -34,12 +34,15 @@ func (ry ReportYear) XmlData() []byte {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Error reading body from %s: %v", url, err)
+	if resp.StatusCode != 200 {
+		log.Printf("Error %d: %s", resp.StatusCode, body)
 	}
 	must(err)
 
 	zipReader, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
+	if err != nil {
+		log.Printf("Error reading body from %s: %v", url, err)
+	}
 	must(err)
 
 	for _, file := range zipReader.File {
