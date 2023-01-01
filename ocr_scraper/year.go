@@ -28,11 +28,15 @@ func (ry ReportYear) Url() string {
 }
 
 func (ry ReportYear) XmlData() []byte {
-	resp, err := http.Get(ry.Url())
+	url := ry.Url()
+	resp, err := http.Get(url)
 	must(err)
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Error reading body from %s: %v", url, err)
+	}
 	must(err)
 
 	zipReader, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
