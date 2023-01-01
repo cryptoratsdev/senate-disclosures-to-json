@@ -90,5 +90,9 @@ func (ry ReportYear) Data() Disclosures {
 }
 
 func (ry ReportYear) ResetCache() {
-	must(os.Remove(ry.CacheFname()))
+	fname := ry.CacheFname()
+	err := os.Remove(fname)
+	if err != nil {
+		log.Printf("Could not remove cache file %s", fname)
+	}
 }
